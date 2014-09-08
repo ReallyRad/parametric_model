@@ -13,6 +13,8 @@ boolean sideDraw = true;
 boolean bottomDraw = true;
 boolean backDraw = true;
 boolean topDraw = true;
+boolean frontDraw = true;
+boolean reflectionPaneDraw = true;
 PImage grid;
 
 JoonsRenderer jr;
@@ -37,225 +39,260 @@ void setup(){
 }
 
 void draw() {
-  //cam.setState(new CameraState(new Rotation(), new Vector3D(0,0,0), (double) 500));
-  
-  int woodThickness = 13;
-  int verticalHeight = 721;
-  int depth = 300;
-  int screenWidth = 693;
+  //cam.setState(new CameraState(new Rotation(), new Vector3D(0,0,0), (double) 500));  
+  int woodThickness = 11;
+  int verticalHeight = 822;
+  int depth = 384;
+  int screenWidth = 659;
   int frontExtrude = 48;
   stroke(0);
   background(0);  
   jr.beginRecord();
+    //jr.background("cornell_box", 5000, 5000, 5000); //Cornell Box: width, height, depth.
+
   pushMatrix();
-    //translate();
-    jr.background("cornell_box", 400000,40000,4000);
+    //translate();    
     //jr.background("gi_instant");
   popMatrix();  
   pushMatrix();
     rotateX(PI);
-    specular(255, 255, 255);
+    specular(255, 255, 78);
     drawAxis(50);  
     drawFloor(workArea, 0);
+    jr.fill("diffuse", 50, 50, 50);
     //jr.fill("diffuse", 150, 255, 255);
-    //jr.fill("ambient_occlusion", 150, 255, 255, 0, 0, 255, 50, 16); 
-    if (bottomDraw) bottomBoard(woodThickness, screenWidth, depth, frontExtrude, #FFFFFF);
-    if (sideDraw) verticalSide(woodThickness, depth, verticalHeight, #FFFFFF);
+    //jr.fill("ambient_occlusion", 150, 255, 255, 0, 0, 255, 50, 16);    
+    bottomBoard(woodThickness, screenWidth, depth, frontExtrude, #ffffa3);    
+    verticalSide(woodThickness, depth, verticalHeight, #0002b4);
     pushMatrix();
       translate(+screenWidth-woodThickness,0,0);
-      if (sideDraw) verticalSide(woodThickness, depth, verticalHeight, #FFFFFF);
+      verticalSide(woodThickness, depth, verticalHeight, #ffffc7);
     popMatrix();
-    if (backDraw) backFace(woodThickness, screenWidth, verticalHeight, depth, #FFFFFF);    
-    stroke(0);
-    if (topDraw) topFace(woodThickness, screenWidth, verticalHeight, depth, #FFFFFF); 
+    backFace(woodThickness, screenWidth, verticalHeight, depth, #FFFFFF);     
+    topFace(woodThickness, screenWidth, verticalHeight, depth, #FFFFFF);
+    frontDraw(woodThickness, screenWidth, verticalHeight);
+    noFill();
   popMatrix();
+  pushMatrix();
+      jr.fill("light", 255, 255, 31);
+    translate(934,0,268);
+    sphere(31);
+  popMatrix();
+jr.endRecord();  
 noFill();  
 }
 
+void reflectionPane(){
+  if (reflectionPaneDraw) {
+    pushMatrix();
+    
+    popMatrix();
+  }
+}
+
+void frontDraw(int wt, int sw, int vh) {
+    if (frontDraw) {  
+      stroke(190);
+      pushMatrix();
+        translate(500+0.5*sw,507,-0.5*vh-wt);
+        jr.fill("glass", 150, 255, 255, 0, 0, 255, 50, 16);     
+        box(sw-wt*2,12,vh);
+      popMatrix();
+    }
+}
+
 void topFace(int wt, int sw, int vh, int d, int s){
-  stroke(s);
-  fill(s+#444444);
- /* beginShape();
-    vertex(500+sw, 500+d, -vh-wt);
-    vertex(500, 500+d, -vh-wt);
-    vertex(500, 500,-vh-wt);
-    vertex(500+sw, 500, -vh-wt);
-  endShape();*/
-  pushMatrix();
-    translate(847, 650,-vh+-6.5-wt);
-    box(sw, d, -wt);
-  popMatrix();  
+  if (topDraw) {
+    stroke(s);
+    fill(s+#444444);
+   /* beginShape(QUADS);
+      vertex(500+sw, 500+d, -vh-wt);
+      vertex(500, 500+d, -vh-wt);
+      vertex(500, 500,-vh-wt);
+      vertex(500+sw, 500, -vh-wt);
+    endShape();*/
+    pushMatrix();
+      translate(500+0.5*sw, 0.5*d+500,-vh-1.5*wt);
+      box(sw, d, wt);
+    popMatrix();  
+  }
 }
 
 void backFace(int wt, int sw, int vh, int d, int s) {
-  stroke(s);
-  fill(s+#555555);
-  //back board, outer face
-  beginShape();
-    vertex(500+wt,500+d,-wt);
-    vertex(500+wt,500+d,-wt-vh);
-    vertex(500+sw-wt,500+d, -wt-vh);
-    vertex(500+sw-wt,500+d,-wt);
-  endShape();
-  //back board, inner face
-  pushMatrix();
-    translate(0,-wt,0);
-    beginShape();
-    vertex(500+wt,500+d,-wt);
-    vertex(500+wt,500+d,-wt-vh);
-    vertex(500+sw-wt,500+d, -wt-vh);
-    vertex(500+sw-wt,500+d,-wt);    
+  if (backDraw) {
+    stroke(s);
+    fill(s+#555555);
+    //back board, outer face
+    beginShape(QUADS);
+      vertex(500+wt,500+d,-wt);
+      vertex(500+wt,500+d,-wt-vh);
+      vertex(500+sw-wt,500+d, -wt-vh);
+      vertex(500+sw-wt,500+d,-wt);
     endShape();
-  popMatrix();
-  //backboard, top face
-  beginShape();
-    vertex(500+sw-wt,500+d,-wt-vh);
-    vertex(500+wt,500+d,-wt-vh);
-    vertex(500+wt,500+d-wt,-wt-vh);
-    vertex(500+sw-wt,500+d-wt,-wt-vh);  
-  endShape();
-  
-  //backboard, bottom face  
-  beginShape();
-    vertex(500+sw-wt,500+d,-wt);
-    vertex(500+wt,500+d,-wt);
-    vertex(500+wt,500+d-wt,-wt);
-    vertex(500+sw-wt,500+d-wt,-wt);  
-  endShape();  
+    //back board, inner face
+    pushMatrix();
+      translate(0,-wt,0);
+      beginShape(QUADS);
+      vertex(500+wt,500+d,-wt);
+      vertex(500+wt,500+d,-wt-vh);
+      vertex(500+sw-wt,500+d, -wt-vh);
+      vertex(500+sw-wt,500+d,-wt);    
+      endShape();
+    popMatrix();
+    //backboard, top face
+    beginShape(QUADS);
+      vertex(500+sw-wt,500+d,-wt-vh);
+      vertex(500+wt,500+d,-wt-vh);
+      vertex(500+wt,500+d-wt,-wt-vh);
+      vertex(500+sw-wt,500+d-wt,-wt-vh);  
+    endShape();
     
- //back board, right face
-  beginShape();
-    vertex(500+wt, 500+d, -wt-vh);
-    vertex(500+wt,500+d-wt, -wt-vh);
-    vertex(500+wt,500+d-wt, -wt);
-    vertex(500+wt, 500+d, -wt);
-  endShape();
-  
- //back board, left face
-  beginShape();
-    vertex(500+sw-wt, 500+d, -wt-vh);
-    vertex(500+sw-wt,500+d-wt, -wt-vh);
-    vertex(500+sw-wt,500+d-wt, -wt);
-    vertex(500+sw-wt, 500+d, -wt);
-  endShape();
+    //backboard, bottom face  
+    beginShape(QUADS);
+      vertex(500+sw-wt,500+d,-wt);
+      vertex(500+wt,500+d,-wt);
+      vertex(500+wt,500+d-wt,-wt);
+      vertex(500+sw-wt,500+d-wt,-wt);  
+    endShape();  
+      
+   //back board, right face
+    beginShape(QUADS);
+      vertex(500+wt, 500+d, -wt-vh);
+      vertex(500+wt,500+d-wt, -wt-vh);
+      vertex(500+wt,500+d-wt, -wt);
+      vertex(500+wt, 500+d, -wt);
+    endShape();
     
-  /*
-  //back board, left face
-  beginShape();
-    vertex(500+wt, 500+d, -wt-vh);
-    vertex(500+wt,500+d-wt, -wt);
-    vertex(500+wt,500+d-wt, -wt);
-    vertex(500+wt, 500+d, -wt-vh);
-  endShape();
-  */
+   //back board, left face
+    beginShape(QUADS);
+      vertex(500+sw-wt, 500+d, -wt-vh);
+      vertex(500+sw-wt,500+d-wt, -wt-vh);
+      vertex(500+sw-wt,500+d-wt, -wt);
+      vertex(500+sw-wt, 500+d, -wt);
+    endShape();
+      
+    /*
+    //back board, left face
+    beginShape(QUADS);
+      vertex(500+wt, 500+d, -wt-vh);
+      vertex(500+wt,500+d-wt, -wt);
+      vertex(500+wt,500+d-wt, -wt);
+      vertex(500+wt, 500+d, -wt-vh);
+    endShape();
+    */
+  } 
 }
 
 void verticalSide(int wt, int d, int vh, int s) {
-  stroke(s);
-  fill(s+#555555);  
-  //vertical right board, outer face
-   beginShape();
-     vertex(500,500,-wt);
-     vertex(500, 500+d,-wt);
-     vertex(500, 500+d, -vh-wt);
-     vertex(500, 500,-vh-wt);
-   endShape();
-   //vertical right board, inner face
-   pushMatrix();
-   translate(wt, 0, 0);
-     beginShape();
+  if (sideDraw) {
+    stroke(s);
+    fill(s+#555555);  
+    //vertical right board, outer face
+     beginShape(QUADS);
        vertex(500,500,-wt);
        vertex(500, 500+d,-wt);
        vertex(500, 500+d, -vh-wt);
        vertex(500, 500,-vh-wt);
-     endShape();  
-   popMatrix();
-   //vertical right board, front face
-   beginShape();    
-     vertex(500,500,-wt);
-     vertex(500+wt,500,-wt);
-     vertex(500+wt,500,-vh-wt);  
-     vertex(500,500,-vh-wt);
-   endShape();
-  //vertical right board, back face
-  pushMatrix();
-    translate(0,d,0);
-    beginShape();       
-      vertex(500,500,-wt);
-      vertex(500+wt,500,-wt);
-      vertex(500+wt,500,-vh-wt);  
-      vertex(500,500,-vh-wt);
-    endShape();
-  popMatrix();
-    
-  //vertical right board, bottom face
-  beginShape();    
-    vertex(500,500+d, -wt);
-    vertex(500+wt,500+d, -wt);   
-    vertex(500+wt,500, -wt);  
-    vertex(500,500, -wt);  
-  endShape();
- 
-  //vertical right board, top face
-  pushMatrix();
-    translate(0,0,-vh);
-    beginShape();      
+     endShape();
+     //vertical right board, inner face
+     pushMatrix();
+     translate(wt, 0, 0);
+       beginShape(QUADS);
+         vertex(500,500,-wt);
+         vertex(500, 500+d,-wt);
+         vertex(500, 500+d, -vh-wt);
+         vertex(500, 500,-vh-wt);
+       endShape();  
+     popMatrix();
+     //vertical right board, front face
+     beginShape(QUADS);    
+       vertex(500,500,-wt);
+       vertex(500+wt,500,-wt);
+       vertex(500+wt,500,-vh-wt);  
+       vertex(500,500,-vh-wt);
+     endShape();
+    //vertical right board, back face
+    pushMatrix();
+      translate(0,d,0);
+      beginShape(QUADS);       
+        vertex(500,500,-wt);
+        vertex(500+wt,500,-wt);
+        vertex(500+wt,500,-vh-wt);  
+        vertex(500,500,-vh-wt);
+      endShape();
+    popMatrix();
+      
+    //vertical right board, bottom face
+    beginShape(QUADS);    
       vertex(500,500+d, -wt);
       vertex(500+wt,500+d, -wt);   
       vertex(500+wt,500, -wt);  
       vertex(500,500, -wt);  
     endShape();
-  popMatrix();    
+   
+    //vertical right board, top face
+    pushMatrix();
+      translate(0,0,-vh);
+      beginShape(QUADS);      
+        vertex(500,500+d, -wt);
+        vertex(500+wt,500+d, -wt);   
+        vertex(500+wt,500, -wt);  
+        vertex(500,500, -wt);  
+      endShape();
+    popMatrix();
+  }  
 }
 
 void bottomBoard(int wt, int sw, int d, int fe, int s) {  
-  stroke(s);
-  fill(s+#555555);
-  beginShape();
-    //front board, lower face
-    vertex(500, 50+fe, 0);
-    vertex(500+sw, 250+fe, 0);  
-    vertex(500+sw, 500+d, 0);
-    vertex(500, 500+d, 0);  
-  endShape();
-  pushMatrix();
-    translate(0, 0, -wt);
-    beginShape();
-      //bottom board, upper face
+  if (bottomDraw) {  
+    stroke(s);
+    fill(s+#555555);
+    beginShape(QUADS);
+      //front board, lower face
       vertex(500, 50+fe, 0);
       vertex(500+sw, 250+fe, 0);  
       vertex(500+sw, 500+d, 0);
       vertex(500, 500+d, 0);  
     endShape();
-  popMatrix();
-  //bottom board, front face
-  beginShape();
-    vertex(500,50+fe,0);
-    vertex(500+sw,250+fe,0);
-    vertex(500+sw,250+fe,-wt);
-    vertex(500,50+fe,-wt);
-  endShape();    
-  //bottom board, right face    
-  beginShape();
-    vertex(500+sw, 250+fe, 0);
-    vertex(500+sw, 500+d, 0);  
-    vertex(500+sw, 500+d, -wt);
-    vertex(500+sw, 250+fe, -wt);
-  endShape();
-  //bottom board, back face
-  beginShape();
-    vertex(500+sw, 500+d, 0);
-    vertex(500, 500+d, 0);
-    vertex(500, 500+d, -wt);
-    vertex(500+sw, 500+d, -wt);
-  endShape();
-  //bottom board, left face
-  beginShape();
-    vertex(500, 500+d, 0);
-    vertex(500, 50+fe, 0);
-    vertex(500, 50+fe, -wt);
-    vertex(500, 500+d, -wt);
-  endShape();  
+    pushMatrix();
+      translate(0, 0, -wt);
+      beginShape(QUADS);
+        //bottom board, upper face
+        vertex(500, 50+fe, 0);
+        vertex(500+sw, 250+fe, 0);  
+        vertex(500+sw, 500+d, 0);
+        vertex(500, 500+d, 0);  
+      endShape();
+    popMatrix();
+    //bottom board, front face
+    beginShape(QUADS);
+      vertex(500,50+fe,0);
+      vertex(500+sw,250+fe,0);
+      vertex(500+sw,250+fe,-wt);
+      vertex(500,50+fe,-wt);
+    endShape();    
+    //bottom board, right face    
+    beginShape(QUADS);
+      vertex(500+sw, 250+fe, 0);
+      vertex(500+sw, 500+d, 0);  
+      vertex(500+sw, 500+d, -wt);
+      vertex(500+sw, 250+fe, -wt);
+    endShape();
+    //bottom board, back face
+    beginShape(QUADS);
+      vertex(500+sw, 500+d, 0);
+      vertex(500, 500+d, 0);
+      vertex(500, 500+d, -wt);
+      vertex(500+sw, 500+d, -wt);
+    endShape();
+    //bottom board, left face
+    beginShape(QUADS);
+      vertex(500, 500+d, 0);
+      vertex(500, 50+fe, 0);
+      vertex(500, 50+fe, -wt);
+      vertex(500, 500+d, -wt);
+    endShape();
+  }  
 }
 
 void drawAxis(int l) {  
@@ -276,7 +313,7 @@ void drawFloor(int l, int h){
     fill(255);
     pushMatrix();
     rotateX(6*PI/4);
-      beginShape();
+      beginShape(QUADS);
         texture(grid);
         vertex(0, h, 0, 0, 0);
         vertex(2*l, h, 0,800 ,0 );
@@ -288,14 +325,15 @@ void drawFloor(int l, int h){
 }
 
 void keyPressed() {
-  if (key == 'f') floorDraw=!floorDraw;  
-  if (key == 's') sideDraw=!sideDraw;  
-  if (key == 'b') bottomDraw=!bottomDraw;  
-  if (key == 'a') backDraw=!backDraw;
-  if (key == 't') topDraw=!topDraw;    
+  if (key == 'a') floorDraw=!floorDraw;
+  if (key == 'z') frontDraw=!frontDraw;
+  if (key == 'e') sideDraw=!sideDraw;  
+  if (key == 'r') bottomDraw=!bottomDraw;  
+  if (key == 't') backDraw=!backDraw;
+  if (key == 'y') topDraw=!topDraw;    
   if (key == '5') cam.setDistance(cam.getDistance()+85);    
   if (key == '0') cam.setDistance(cam.getDistance()-85);  
-  
+  if (key == ' ') jr.render(); //Press 'r' key to start rendering.
   if (key == '8') cam.pan(0,-7);
   if (key == '2') cam.pan(0,7);
   if (key == '4') cam.pan(-7,0);
