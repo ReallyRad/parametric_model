@@ -6,7 +6,7 @@ import peasy.*;
 import peasy.org.apache.commons.math.geometry.*;
 
 PeasyCam cam;
-static int workArea = 1000;
+int workArea = 10000;
 
 boolean floorDraw = true;
 boolean sideDraw = true;
@@ -24,8 +24,8 @@ CameraState initState;
 //setState(CameraState state)
 
 void setup(){
-  //size(1920,1000, OPENGL);
-  size(1366/2,766, OPENGL);
+  size(1920,1000, OPENGL);
+  //size(1366/2,766, P3D);  
   cam = new PeasyCam(this, 100);  
   grid = loadImage("grid.png");
   
@@ -34,49 +34,58 @@ void setup(){
   cam.setDistance(500);
   
   jr = new JoonsRenderer(this);
+  jr.setSizeMultiplier(2); //Set size of PNG fil
   
   initState = cam.getState();
 }
 
 void draw() {
   //cam.setState(new CameraState(new Rotation(), new Vector3D(0,0,0), (double) 500));  
-  int woodThickness = 11;
-  int verticalHeight = 822;
-  int depth = 384;
-  int screenWidth = 659;
-  int frontExtrude = 48;
+  int woodThickness = 46;
+  int verticalHeight = 732;
+  int depth = 352;
+  int screenWidth = 932;
+  int frontExtrude = -47;
   stroke(0);
   background(0);  
-  jr.beginRecord();
-    //jr.background("cornell_box", 5000, 5000, 5000); //Cornell Box: width, height, depth.
-
+  jr.beginRecord();  
+  //jr.background("gi_instant");
+  //jr.background("gi_ambient_occlusion", 206, 12, 250, 80,80,80, 3384, 303);
+  jr.background("gi_ambient_occlusion");
   pushMatrix();
-    //translate();    
-    //jr.background("gi_instant");
+    
+    //jr.background("cornell_box", 5000, 5000, 5000); //Cornell Box: width, height, depth.
   popMatrix();  
   pushMatrix();
     rotateX(PI);
     specular(255, 255, 78);
-    drawAxis(50);  
-    drawFloor(workArea, 0);
+    drawAxis(50);      
     jr.fill("diffuse", 50, 50, 50);
+    drawFloor(workArea, 0);
     //jr.fill("diffuse", 150, 255, 255);
     //jr.fill("ambient_occlusion", 150, 255, 255, 0, 0, 255, 50, 16);    
-    bottomBoard(woodThickness, screenWidth, depth, frontExtrude, #ffffa3);    
-    verticalSide(woodThickness, depth, verticalHeight, #0002b4);
+    bottomBoard(woodThickness, screenWidth, depth, frontExtrude, #ffffff);    
+    verticalSide(woodThickness, depth, verticalHeight, #ffffff);
     pushMatrix();
       translate(+screenWidth-woodThickness,0,0);
-      verticalSide(woodThickness, depth, verticalHeight, #ffffc7);
+      verticalSide(woodThickness, depth, verticalHeight, #ffffff);
     popMatrix();
     backFace(woodThickness, screenWidth, verticalHeight, depth, #FFFFFF);     
     topFace(woodThickness, screenWidth, verticalHeight, depth, #FFFFFF);
     frontDraw(woodThickness, screenWidth, verticalHeight);
     noFill();
   popMatrix();
+  
   pushMatrix();
-      jr.fill("light", 255, 255, 31);
-    translate(934,0,268);
-    sphere(31);
+    jr.fill("light", 255, 255, 255);
+    translate(856,459,2431);
+    rotateX(11*PI/6);  
+    box(2127,748,5);
+  popMatrix();
+  
+  pushMatrix();     
+    translate(691,-256,434);
+    sphere(63);
   popMatrix();
 jr.endRecord();  
 noFill();  
@@ -95,13 +104,14 @@ void frontDraw(int wt, int sw, int vh) {
       stroke(190);
       pushMatrix();
         translate(500+0.5*sw,507,-0.5*vh-wt);
-        jr.fill("glass", 150, 255, 255, 0, 0, 255, 50, 16);     
+        //jr.fill("glass", 150, 214, 237, 0, 0, 255, 50, 16); 
+        jr.fill("mirror", 255, 255, 255);    
         box(sw-wt*2,12,vh);
       popMatrix();
     }
 }
 
-void topFace(int wt, int sw, int vh, int d, int s){
+void topFace(int wt, int sw, int vh, int d, int s) {
   if (topDraw) {
     stroke(s);
     fill(s+#444444);
@@ -310,17 +320,23 @@ void drawAxis(int l) {
 
 void drawFloor(int l, int h){
   if (floorDraw){
-    fill(255);
     pushMatrix();
-    rotateX(6*PI/4);
-      beginShape(QUADS);
-        texture(grid);
+      translate(50*10,5000,0);
+      fill(2);        
+      box(210*58,1000*24,10);
+    popMatrix();
+    /*
+    pushMatrix();
+      rotateX(6*PI/4);
+      beginShape(QUADS);        
+        texture(grid);        
         vertex(0, h, 0, 0, 0);
         vertex(2*l, h, 0,800 ,0 );
         vertex(2*l, h, 2*l, 800, 800);
         vertex(0, h, 2*l, 0, 800);
       endShape();
     popMatrix();
+    */
   }
 }
 
